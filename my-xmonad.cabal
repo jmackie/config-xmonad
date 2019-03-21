@@ -1,0 +1,22 @@
+cabal-version: >=2.0
+
+name: my-xmonad
+version: 0.1.0
+build-type: Simple
+
+executable my-xmonad
+    main-is: ../xmonad.hs
+    hs-source-dirs: src
+    --other-modules:
+
+    build-depends:
+        base
+      , xmonad >= 0.13
+      , xmonad-contrib >= 0.13
+    default-language:
+        Haskell2010
+    ghc-options:
+        -Wall
+        -Werror
+        -fno-warn-missing-signatures
+        -threaded
