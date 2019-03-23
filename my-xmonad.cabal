@@ -7,16 +7,23 @@ build-type: Simple
 executable my-xmonad
     main-is: ../xmonad.hs
     hs-source-dirs: src
-    --other-modules:
+    other-modules:
+        Colors
+        Language.Haskell.TH.Quote.Text
 
     build-depends:
         base
       , xmonad >= 0.13
       , xmonad-contrib >= 0.13
+      , containers
+      , template-haskell
     default-language:
         Haskell2010
+    default-extensions:
+        NoImplicitPrelude
     ghc-options:
-        -Wall
-        -Werror
-        -fno-warn-missing-signatures
         -threaded
+
+        -Wall
+        -fno-warn-missing-signatures
+        -fno-warn-partial-type-signatures

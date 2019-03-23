@@ -8,7 +8,7 @@ steps:
           align: none
           list_align: after_alias
           pad_module_names: false
-          long_list_align: multiline
+          long_list_align: new_line
           empty_list_align: inherit
           list_padding: 4
           separate_lists: false
