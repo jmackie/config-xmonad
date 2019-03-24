@@ -1,7 +1,6 @@
 {-# LANGUAGE NamedFieldPuns        #-}
 {-# LANGUAGE OverloadedLists       #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE QuasiQuotes           #-}
 
 module Main (main) where
 
@@ -28,6 +27,7 @@ myXConfig = desktopConfig
     { terminal = "alacritty"
     , modMask = mod1Mask -- Alt
     , workspaces = myWorkspaces
+    , startupHook = myStartupHook
     , manageHook = myManageHook <+> manageHook desktopConfig
     , keys = myKeys <> XMonad.keys desktopConfig
     , logHook = dynamicLogString def >>= xmonadPropLog
@@ -39,6 +39,10 @@ myXConfig = desktopConfig
 
 myWorkspaces :: [String]
 myWorkspaces = ["1:term","2:web","3","4","5","6","7","8","9","0","-","="]
+
+
+myStartupHook :: X ()
+myStartupHook = pure ()
 
 
 -- | Stdin pretty-printer for xmobar.
