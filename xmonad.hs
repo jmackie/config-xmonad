@@ -31,7 +31,9 @@ myXConfig = desktopConfig
     , manageHook = myManageHook <+> manageHook desktopConfig
     , keys = myKeys <> XMonad.keys desktopConfig
     , logHook = dynamicLogString def >>= xmonadPropLog
+    , normalBorderColor = Colors.black
     , focusedBorderColor = Colors.brightGreen
+    , borderWidth = 2
     }
 
 
@@ -68,8 +70,8 @@ myKeys XConfig{ terminal, modMask } =
       ( (modMask, xK_p )
       , spawn dmenu
       )
-      -- TODO: It would be nice if I could make this use the focused terminal's
-      -- wd
+      -- TODO: It would be nice if I could make this 
+      -- use the focused terminal's working dir
     , ( (modMask .|. shiftMask, xK_Return)
       , spawn terminal
       )
@@ -89,5 +91,6 @@ myKeys XConfig{ terminal, modMask } =
         \-p Run"
 
 
+-- | @mod-b@ toggles struts.
 toggleStrutsKey :: XConfig a -> (KeyMask, KeySym)
 toggleStrutsKey XConfig { modMask } = (modMask, xK_b)
