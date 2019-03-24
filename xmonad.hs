@@ -13,6 +13,7 @@ import XMonad.Config.Desktop (desktopConfig)
 import XMonad.Hooks.DynamicLog (PP, dynamicLogString, statusBar, xmonadPropLog)
 import XMonad.Hooks.ManageHelpers
     (composeOne, doCenterFloat, isDialog, transience, (-?>))
+import XMonad.Util.Cursor (setDefaultCursor, xC_left_ptr)
 
 import qualified Colors
 
@@ -42,7 +43,9 @@ myWorkspaces = ["1:term","2:web","3","4","5","6","7","8","9","0","-","="]
 
 
 myStartupHook :: X ()
-myStartupHook = pure ()
+myStartupHook = do
+    setDefaultCursor xC_left_ptr
+    pure ()
 
 
 -- | Stdin pretty-printer for xmobar.
