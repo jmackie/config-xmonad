@@ -13,8 +13,10 @@ executable my-xmonad
 
     build-depends:
         base
-      , xmonad >= 0.13
-      , xmonad-contrib >= 0.13
+      , xmonad
+      , xmonad-contrib
+      , xmonad-extras
+      , X11
       , containers
       , template-haskell
     default-language:
