@@ -8,14 +8,14 @@ import Prelude
 
 import qualified Data.Map as M
 
+import Graphics.X11.ExtraTypes.XF86
+    (xF86XK_MonBrightnessDown, xF86XK_MonBrightnessUp)
 import XMonad
+import qualified XMonad.Actions.CycleWS as CycleWS
 import XMonad.Config.Desktop (desktopConfig)
 import XMonad.Hooks.DynamicLog (PP, dynamicLogString, statusBar, xmonadPropLog)
 import XMonad.Hooks.ManageHelpers
     (composeOne, doCenterFloat, isDialog, transience, (-?>))
-
-import Graphics.X11.ExtraTypes.XF86
-    (xF86XK_MonBrightnessDown, xF86XK_MonBrightnessUp)
 import qualified XMonad.Util.Brightness as Brightness
 
 import qualified Colors
@@ -42,7 +42,7 @@ myXConfig = desktopConfig
 
 
 myWorkspaces :: [String]
-myWorkspaces = ["1:term","2:web","3","4","5","6","7","8","9","0","-","="]
+myWorkspaces = ["1","2","3","4","5","6","7","8","9","0","-","="]
 
 
 myStartupHook :: X ()
@@ -62,10 +62,7 @@ myPP = def
 -- > xprop | grep WM_CLASS
 myManageHook :: ManageHook
 myManageHook = composeOne
-    [ className =? "Firefox"   -?> doShift "web"
-    , className =? "Alacritty" -?> doShift "term"
-
-    , className =? "Gxmessage" -?> doCenterFloat
+    [ className =? "Gxmessage" -?> doCenterFloat
     , isDialog                 -?> doCenterFloat
 
     , transience -- Move transient windows to their parent
@@ -75,24 +72,30 @@ myManageHook = composeOne
 myKeys :: XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
 myKeys XConfig{ terminal, modMask } =
     [ -- Use a prettier dmenu
-      ( (modMask, xK_p )
+      ( (modMask, xK_p)
       , spawn dmenu
+      )
+      -- mod+tab cycles between workspaces
+    , ( (modMask, xK_Tab)
+      , cycleWS
       )
       -- TODO: It would be nice if I could make this 
       -- use the focused terminal's working dir
     , ( (modMask .|. shiftMask, xK_Return)
       , spawn terminal
       )
-      -- Turn off
-    --, ( (modMask .|. shiftMask, xK_p )
-    --  , ???
-    --  )
-    
+
     , ((0, xF86XK_MonBrightnessUp),   Brightness.increase)
     , ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
+
+      -- Turn off
+      --, ( (modMask .|. shiftMask, xK_p )
+      --  , ???
+      --  )
     ]
   where
-    dmenu :: String
+    cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+
     dmenu = "dmenu_run \
         \-nb \"#000000\" \
         \-nf \"#dddddd\" \
