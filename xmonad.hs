@@ -2,15 +2,16 @@
 {-# LANGUAGE NamedFieldPuns        #-}
 {-# LANGUAGE OverloadedLists       #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
 
 module Main (main) where
 
 import Prelude
 
-import Control.Arrow ((>>>))
 import qualified Data.List as List
 import qualified Data.Map as M
 import System.Directory (getSymbolicLinkTarget)
+import System.Posix.Types (ProcessID)
 
 import Graphics.X11.ExtraTypes.XF86
   (xF86XK_MonBrightnessDown, xF86XK_MonBrightnessUp)
@@ -22,7 +23,7 @@ import XMonad.Hooks.DynamicLog
   (PP(..), dynamicLogString, statusBar, xmobarPP, xmonadPropLog)
 import XMonad.Hooks.ManageHelpers
   (composeOne, doCenterFloat, isDialog, pid, transience, (-?>))
-import qualified XMonad.Layout.WorkspaceDir as WorkspaceDir
+import XMonad.Prompt (XPConfig(..))
 import qualified XMonad.StackSet as StackSet
 import qualified XMonad.Util.Brightness as Brightness
 
@@ -59,8 +60,8 @@ myStartupHook = pure ()
 myPP :: PP
 myPP = 
   xmobarPP 
-    { ppOrder = \(ws:_:t:_) -> [ws, t]
-    , ppExtras = []
+    { ppOrder = \(ws:_:t:pid':_) -> [ws, pid', t]
+    , ppExtras = [ Just . maybe "" show <$> getPid ]
     }
 
 -- |
@@ -90,13 +91,7 @@ myKeys XConfig{ terminal, modMask } =
     -- TODO: It would be nice if I could make this 
     -- use the focused terminal's working dir
   , ( (modMask .|. shiftMask, xK_Return)
-    , spawnTerminalInSameDirectory terminal
-    )
-
-    -- WIP: Prompt to change workspace directory
-  , ( (modMask .|. shiftMask, xK_x)
-    , WorkspaceDir.changeDir def
-    --                       ^^^ TODO: configure this better
+    , spawn terminal
     )
 
   , ((0, xF86XK_MonBrightnessUp),   Brightness.increase)
@@ -121,21 +116,30 @@ getFocusedWindow
  . StackSet.workspace 
  . StackSet.current
 
-spawnTerminalInSameDirectory :: String -> X ()
-spawnTerminalInSameDirectory terminal = 
-  withWindowSet $ getFocusedWindow >>> \case
-    Nothing  -> spawn terminal
-    Just win ->
-      runQuery pid win >>= \case
-        Nothing -> spawn terminal
-        Just pid' -> do
-          name <- io $ readFile ("/proc/" <> show pid' <> "/cmdline")
-          if terminal `List.isPrefixOf` name 
-             then do
-                 wd <- io $ getSymbolicLinkTarget ("/proc/" <> show pid' <> "/cwd")
-                 spawn (terminal <> " --working-directory=" <> wd)
+_myXPConfig :: XPConfig
+_myXPConfig = def 
+  { font = "xft:Hack:bold:pixelsize=36"
+  }
 
-             else spawn terminal
+-- | Doesn't work as I want it to...
+_spawnTerminalInSameDirectory :: String -> X ()
+_spawnTerminalInSameDirectory terminal = 
+  flip catchX (spawn terminal) $ do
+    Just pid' <- getPid
+    name <- io $ readFile ("/proc/" <> show pid' <> "/cmdline")
+    if terminal `List.isPrefixOf` name 
+       then do
+         wd <- io $ getSymbolicLinkTarget ("/proc/" <> show pid' <> "/cwd")
+         spawn (terminal <> " --working-directory=" <> wd)
+       else spawn terminal
+
+getPid :: X (Maybe ProcessID)
+getPid = 
+  withWindowSet $ \windowSet -> 
+     case getFocusedWindow windowSet of
+       Nothing  -> pure Nothing
+       Just win -> runQuery pid win 
+ 
 
 -- | @mod-b@ toggles struts.
 toggleStrutsKey :: XConfig a -> (KeyMask, KeySym)
