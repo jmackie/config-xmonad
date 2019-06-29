@@ -94,6 +94,10 @@ myKeys XConfig{ terminal, modMask } =
     , spawn terminal
     )
 
+  , ( (modMask, xK_g)
+    , spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
+    )
+
   , ((0, xF86XK_MonBrightnessUp),   Brightness.increase)
   , ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
   ]
