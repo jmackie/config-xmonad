@@ -1,6 +1,6 @@
 Config
   { position = TopW L 100,
-    template = "%StdinReader% }{ %cpu% | %memory% * %swap% | %battery% | <fc=#fd28ff>%date%</fc>",
+    template = "%StdinReader% }{ %cpu% | %memory% | %enp4s0% | <fc=#fd28ff>%date%</fc>",
     font = "xft:Hack:size=10:bold:antialias=true",
     border = BottomB,
     borderColor = "#000000",
@@ -29,27 +29,22 @@ Config
           ]
           10,
         Run
-          Swap
-          []
-          10,
-        Run
-          Battery
-          [ "-H",
-            "75",
-            "-L",
-            "49",
-            "--high",
-            "#23fd00",
-            "--normal",
-            "#fffd00",
-            "--low",
-            "#f2201f"
-          ]
-          20,
-        Run
           Date
           "%a %b %_d %Y %H:%M"
           "date"
+          10,
+        Run
+          Network
+          "enp4s0"
+          [ "-L",
+            "0",
+            "-H",
+            "32",
+            "--normal",
+            "green",
+            "--high",
+            "red"
+          ]
           10
       ]
   }

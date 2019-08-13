@@ -32,6 +32,13 @@ import XMonad.Hooks.ManageHelpers
     pid,
     transience,
   )
+import XMonad.Layout.ZoomRow
+  ( ZoomMessage (..),
+    zoomIn,
+    zoomOut,
+    zoomReset,
+    zoomRow,
+  )
 import XMonad.Prompt (XPConfig (..))
 import qualified XMonad.StackSet as StackSet
 import qualified XMonad.Util.Brightness as Brightness
@@ -53,7 +60,8 @@ myXConfig =
       logHook = dynamicLogString def >>= xmonadPropLog,
       normalBorderColor = black,
       focusedBorderColor = brightGreen,
-      borderWidth = 2
+      borderWidth = 2,
+      layoutHook = layoutHook desktopConfig ||| Mirror zoomRow
     }
 
 myWorkspaces :: [String]
@@ -92,7 +100,7 @@ myKeys XConfig {terminal, modMask} =
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
-      cycleWS
+      CycleWS.nextScreen
     ),
     -- TODO: It would be nice if I could make this
     -- use the focused terminal's working dir
@@ -103,10 +111,16 @@ myKeys XConfig {terminal, modMask} =
       spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
     ),
     ((0, xF86XK_MonBrightnessUp), Brightness.increase),
-    ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
+    ((0, xF86XK_MonBrightnessDown), Brightness.decrease),
+    -- Increase the size occupied by the focused window
+    ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn),
+    -- Decrease the size occupied by the focused window
+    ((modMask, xK_minus), sendMessage zoomOut),
+    -- Reset the size occupied by the focused window
+    ((modMask, xK_equal), sendMessage zoomReset),
+    -- (Un)Maximize the focused window
+    ((modMask, xK_f), sendMessage ZoomFullToggle)
   ]
-  where
-    cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
 
 dmenuCommand :: String
 dmenuCommand =
