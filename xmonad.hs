@@ -87,9 +87,9 @@ myKeys XConfig{ terminal, modMask } =
     ( (modMask, xK_p)
     , spawn dmenu
     )
-    -- mod+tab cycles between workspaces
+    -- mod+tab cycles between screens
   , ( (modMask, xK_Tab)
-    , cycleWS
+    , CycleWS.nextScreen
     )
     -- TODO: It would be nice if I could make this 
     -- use the focused terminal's working dir
@@ -114,7 +114,7 @@ myKeys XConfig{ terminal, modMask } =
   , ((modMask, xK_f), sendMessage ZoomFullToggle)
   ]
   where
-  cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+  _cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
 
   dmenu = 
     "dmenu_run \
