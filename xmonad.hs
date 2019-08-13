@@ -23,6 +23,8 @@ import XMonad.Hooks.DynamicLog
   (PP(..), dynamicLogString, statusBar, xmobarPP, xmonadPropLog)
 import XMonad.Hooks.ManageHelpers
   (composeOne, doCenterFloat, isDialog, pid, transience, (-?>))
+import XMonad.Layout.ZoomRow
+  (ZoomMessage(..), zoomIn, zoomOut, zoomReset, zoomRow)
 import XMonad.Prompt (XPConfig(..))
 import qualified XMonad.StackSet as StackSet
 import qualified XMonad.Util.Brightness as Brightness
@@ -47,6 +49,7 @@ myXConfig =
     , logHook = dynamicLogString def >>= xmonadPropLog
     , normalBorderColor = Colors.black
     , focusedBorderColor = Colors.brightGreen
+    , layoutHook = layoutHook desktopConfig ||| Mirror zoomRow
     , borderWidth = 2
     }
 
@@ -100,6 +103,15 @@ myKeys XConfig{ terminal, modMask } =
 
   , ((0, xF86XK_MonBrightnessUp),   Brightness.increase)
   , ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
+
+    -- Increase the size occupied by the focused window
+  , ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn)
+    -- Decrease the size occupied by the focused window
+  , ((modMask, xK_minus), sendMessage zoomOut)
+    -- Reset the size occupied by the focused window
+  , ((modMask, xK_equal), sendMessage zoomReset)
+    -- (Un)Maximize the focused window
+  , ((modMask, xK_f), sendMessage ZoomFullToggle)
   ]
   where
   cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
