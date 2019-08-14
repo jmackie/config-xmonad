@@ -17,3 +17,5 @@ brightBlue    = "#1a8fff"
 brightMagenta = "#fd28ff"
 brightCyan    = "#14ffff"
 brightWhite   = "#ffffff"
+
+gray = "#585858"  -- dark gray used by my vim config 

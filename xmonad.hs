@@ -47,7 +47,7 @@ myXConfig =
     , manageHook = myManageHook <+> manageHook desktopConfig
     , keys = myKeys <> XMonad.keys desktopConfig
     , logHook = dynamicLogString def >>= xmonadPropLog
-    , normalBorderColor = Colors.black
+    , normalBorderColor = Colors.gray
     , focusedBorderColor = Colors.brightGreen
     , layoutHook = layoutHook desktopConfig ||| Mirror zoomRow
     , borderWidth = 2
