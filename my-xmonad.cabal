@@ -5,11 +5,7 @@ version: 0.1.0
 build-type: Simple
 
 executable my-xmonad
-  main-is: ../xmonad.hs
-  hs-source-dirs: src
-  other-modules:
-    Colors
-    Language.Haskell.TH.Quote.Text
+  main-is: xmonad.hs
   build-depends:
     base,
     xmonad,
