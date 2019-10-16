@@ -4,6 +4,6 @@ set -euo pipefail
 # As of 0.13, `xmonad --recompile` will look for a custom `build` script in ~/.xmonad
 # https://github.com/xmonad/xmonad/blob/master/CHANGES.md#013-february-10-2017
 
-stack build :my-xmonad --verbosity info
+stack build :my-xmonad --verbosity info | tee build.log
 stack install :my-xmonad --local-bin-path bin/ --verbosity info
 mv bin/my-xmonad "$1"

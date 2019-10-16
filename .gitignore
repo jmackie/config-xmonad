@@ -2,6 +2,7 @@
 *.o
 *.hi
 *.errors
+build.log
 
 # compiled xmonad executable
 xmonad-*
