@@ -107,6 +107,9 @@ myKeys XConfig {terminal, modMask} =
     ( (modMask .|. shiftMask, xK_Return),
       spawn terminal
     ),
+    ( (modMask .|. shiftMask, xK_l),
+      spawn "slock"
+    ),
     ( (modMask, xK_g),
       spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
     ),
