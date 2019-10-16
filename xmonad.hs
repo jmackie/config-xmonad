@@ -96,7 +96,7 @@ myKeys :: XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
 myKeys XConfig {terminal, modMask} =
   [ -- Use a prettier dmenu
     ( (modMask, xK_p),
-      spawn dmenuCommand
+      spawn prettyDmenu
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
@@ -122,8 +122,8 @@ myKeys XConfig {terminal, modMask} =
     ((modMask, xK_f), sendMessage ZoomFullToggle)
   ]
 
-dmenuCommand :: String
-dmenuCommand =
+prettyDmenu :: String
+prettyDmenu =
   "dmenu_run \
   \-nb '#000000' \
   \-nf '#dddddd' \
