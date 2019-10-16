@@ -1,17 +1,17 @@
-resolver: lts-13.13  # ghc864
+resolver: lts-13.13 # ghc864
 packages:
-    - .
+  - .
 nix:
-    packages:
-      - pkgconfig
-      - autoconf
-      - gcc
-      - alsaLib
-      - xorg.libX11
-      - xorg.libXext
-      - xorg.libXft
-      - xorg.libXinerama
-      - xorg.libXpm
-      - xorg.libXrandr
-      - xorg.libXrender
-      - xorg.libXScrnSaver
+  packages:
+    - pkgconfig
+    - autoconf
+    - gcc
+    - alsaLib
+    - xorg.libX11
+    - xorg.libXext
+    - xorg.libXft
+    - xorg.libXinerama
+    - xorg.libXpm
+    - xorg.libXrandr
+    - xorg.libXrender
+    - xorg.libXScrnSaver

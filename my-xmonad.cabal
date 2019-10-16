@@ -6,6 +6,13 @@ build-type: Simple
 
 executable my-xmonad
   main-is: xmonad.hs
+  default-language:
+    Haskell2010
+  ghc-options:
+    -threaded
+    -Wall
+    -fno-warn-missing-signatures
+    -fno-warn-partial-type-signatures
   build-depends:
     base,
     xmonad,
@@ -17,12 +24,3 @@ executable my-xmonad
     containers,
     text,
     template-haskell,
-  default-language:
-    Haskell2010
-  default-extensions:
-    NoImplicitPrelude
-  ghc-options:
-    -threaded
-    -Wall
-    -fno-warn-missing-signatures
-    -fno-warn-partial-type-signatures
