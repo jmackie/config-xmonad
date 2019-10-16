@@ -153,7 +153,7 @@ getPid =
       Just win -> runQuery pid win
 
 -- |
--- @mod-b@ toggles struts. TODO what does this mean again?
+-- @mod-b@ toggles struts. (i.e. toggles xmobar)
 toggleStrutsKey :: XConfig a -> (KeyMask, KeySym)
 toggleStrutsKey XConfig {modMask} = (modMask, xK_b)
 
