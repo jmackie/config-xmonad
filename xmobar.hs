@@ -10,6 +10,7 @@ Config
     , alignSep = "}{"
     , commands =
          [ Run StdinReader 
+	       --, Run Com "~/.xmonad/scripts/get-volume.sh" [ "Vol: " ] "myvolume" 10
          , Run Cpu
              [ "-H",       "50"
              , "-L",       "3"
