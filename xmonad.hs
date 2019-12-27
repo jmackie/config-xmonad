@@ -13,6 +13,7 @@ import Graphics.X11.ExtraTypes.XF86
   ( xF86XK_MonBrightnessDown,
     xF86XK_MonBrightnessUp,
   )
+import Network.HostName (getHostName)
 import System.Posix.Types (ProcessID)
 import XMonad
 import qualified XMonad.Actions.CycleWS as CycleWS
@@ -32,28 +33,51 @@ import XMonad.Hooks.ManageHelpers
     pid,
     transience,
   )
+import XMonad.Layout.ZoomRow
+  ( ZoomMessage (..),
+    zoomIn,
+    zoomOut,
+    zoomReset,
+    zoomRow,
+  )
 import XMonad.Prompt (XPConfig (..))
 import qualified XMonad.StackSet as StackSet
 import qualified XMonad.Util.Brightness as Brightness
 
-main :: IO ()
-main =
-  xmonad
-    =<< statusBar "xmobar ~/.xmonad/xmobar.hs" myPP toggleStrutsKey myXConfig
+data Machine
+  = Laptop
+  | Habito -- work
 
-myXConfig :: XConfig _
-myXConfig =
+getMachine :: IO (Maybe Machine)
+getMachine = do
+  hostName <- getHostName
+  case hostName of
+    "jmackie-labtop" -> pure (Just Laptop)
+    "jmackie-habito" -> pure (Just Habito)
+    _ -> pure Nothing
+
+main :: IO ()
+main = do
+  machine <- maybe Laptop id <$> getMachine
+  let xmobar = case machine of
+        Laptop -> "xmobar ~/.xmonad/xmobar.laptop.hs"
+        Habito -> "xmobar ~/.xmonad/xmobar.habito.hs"
+  xmonad =<< statusBar xmobar myPP toggleStrutsKey (myXConfig machine)
+
+myXConfig :: Machine -> XConfig _
+myXConfig machine =
   desktopConfig
     { terminal = "alacritty",
-      modMask = mod1Mask, -- Alt
+      modMask = mod1Mask, -- Alt key
       workspaces = myWorkspaces,
       startupHook = myStartupHook,
       manageHook = myManageHook <+> manageHook desktopConfig,
-      keys = myKeys <> XMonad.keys desktopConfig,
+      keys = myKeys machine <> XMonad.keys desktopConfig,
       logHook = dynamicLogString def >>= xmonadPropLog,
       normalBorderColor = black,
       focusedBorderColor = brightGreen,
-      borderWidth = 2
+      borderWidth = 2,
+      layoutHook = layoutHook desktopConfig ||| Mirror zoomRow
     }
 
 myWorkspaces :: [String]
@@ -72,10 +96,8 @@ myPP =
     }
 
 -- |
--- To get a className, run the following then click on the window
+-- To get a className, run `xprop | grep WM_CLASS` then click on the window
 -- of interest:
---
--- > xprop | grep WM_CLASS
 myManageHook :: ManageHook
 myManageHook =
   composeOne
@@ -84,20 +106,23 @@ myManageHook =
       transience -- Move transient windows to their parent
     ]
 
-myKeys :: XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
-myKeys XConfig {terminal, modMask} =
-  [ -- Use a prettier dmenu
+myKeys :: Machine -> XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
+myKeys machine XConfig {terminal, modMask} =
+  [ -- Prettier dmenu
     ( (modMask, xK_p),
-      spawn dmenuCommand
+      spawn prettyDmenu
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
-      cycleWS
+      CycleWS.nextScreen
     ),
     -- TODO: It would be nice if I could make this
     -- use the focused terminal's working dir
     ( (modMask .|. shiftMask, xK_Return),
       spawn terminal
+    ),
+    ( (modMask .|. shiftMask, xK_l),
+      spawn "slock"
     ),
     ( (modMask, xK_g),
       spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
@@ -105,11 +130,21 @@ myKeys XConfig {terminal, modMask} =
     ((0, xF86XK_MonBrightnessUp), Brightness.increase),
     ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
   ]
-  where
-    cycleWS = CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+    <> case machine of
+      Laptop -> []
+      Habito ->
+        [ -- Increase the size occupied by the focused window
+          ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn),
+          -- Decrease the size occupied by the focused window
+          ((modMask, xK_minus), sendMessage zoomOut),
+          -- Reset the size occupied by the focused window
+          ((modMask, xK_equal), sendMessage zoomReset),
+          -- (Un)Maximize the focused window
+          ((modMask, xK_f), sendMessage ZoomFullToggle)
+        ]
 
-dmenuCommand :: String
-dmenuCommand =
+prettyDmenu :: String
+prettyDmenu =
   "dmenu_run \
   \-nb '#000000' \
   \-nf '#dddddd' \
@@ -139,7 +174,7 @@ getPid =
       Just win -> runQuery pid win
 
 -- |
--- @mod-b@ toggles struts. TODO what does this mean again?
+-- @mod-b@ toggles struts. (i.e. toggles xmboar)
 toggleStrutsKey :: XConfig a -> (KeyMask, KeySym)
 toggleStrutsKey XConfig {modMask} = (modMask, xK_b)
 

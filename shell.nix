@@ -1,5 +1,5 @@
 { ghc ? null # not null if called by `stack build`
-, pkgs ? import <nixpkgs> { } }:
+, pkgs ? import ./nixpkgs { } }:
 let
   ghcide-nix = import (pkgs.fetchFromGitHub {
     owner = "hercules-ci";
