@@ -114,7 +114,9 @@ myKeys machine XConfig {terminal, modMask} =
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
-      CycleWS.nextScreen
+      case machine of
+        Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+        Habito -> CycleWS.nextScreen
     ),
     -- TODO: It would be nice if I could make this
     -- use the focused terminal's working dir
