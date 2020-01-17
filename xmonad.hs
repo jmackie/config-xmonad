@@ -46,14 +46,14 @@ import qualified XMonad.Util.Brightness as Brightness
 
 data Machine
   = Laptop
-  | Habito -- work
+  | Habito 
 
 getMachine :: IO (Maybe Machine)
 getMachine = do
   hostName <- getHostName
   case hostName of
-    "jmackie-labtop" -> pure (Just Laptop)
-    "jmackie-habito" -> pure (Just Habito)
+    "laptop" -> pure (Just Laptop)
+    "habito" -> pure (Just Habito)
     _ -> pure Nothing
 
 main :: IO ()
