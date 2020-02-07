@@ -138,9 +138,9 @@ myKeys machine XConfig {terminal, modMask} =
             fgHLight = black,
             historySize = 0
           }
-    ),
-    ((0, xF86XK_MonBrightnessUp), Brightness.increase),
-    ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
+    )
+    --((0, xF86XK_MonBrightnessUp), undefined)
+    --((0, xF86XK_MonBrightnessDown), undefined)
   ]
     <> case machine of
       Laptop -> []
