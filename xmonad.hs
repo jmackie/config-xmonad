@@ -41,12 +41,13 @@ import XMonad.Layout.ZoomRow
     zoomRow,
   )
 import XMonad.Prompt (XPConfig (..))
+import XMonad.Prompt.Shell (shellPrompt)
 import qualified XMonad.StackSet as StackSet
 import qualified XMonad.Util.Brightness as Brightness
 
 data Machine
   = Laptop
-  | Habito 
+  | Habito
 
 getMachine :: IO (Maybe Machine)
 getMachine = do
@@ -108,11 +109,7 @@ myManageHook =
 
 myKeys :: Machine -> XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
 myKeys machine XConfig {terminal, modMask} =
-  [ -- Prettier dmenu
-    ( (modMask, xK_p),
-      spawn prettyDmenu
-    ),
-    -- mod+tab cycles between workspaces
+  [ -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
       case machine of
         Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
@@ -128,6 +125,19 @@ myKeys machine XConfig {terminal, modMask} =
     ),
     ( (modMask, xK_g),
       spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
+    ),
+    -- Like dmenu but built in to xmonad :)
+    ( (modMask, xK_p),
+      shellPrompt
+        (def :: XPConfig)
+          { font = "xft:Hack:bold:pixelsize=36",
+            height = 50,
+            bgColor = black,
+            fgColor = white,
+            bgHLight = brightCyan,
+            fgHLight = black,
+            historySize = 0
+          }
     ),
     ((0, xF86XK_MonBrightnessUp), Brightness.increase),
     ((0, xF86XK_MonBrightnessDown), Brightness.decrease)
@@ -145,28 +155,12 @@ myKeys machine XConfig {terminal, modMask} =
           ((modMask, xK_f), sendMessage ZoomFullToggle)
         ]
 
-prettyDmenu :: String
-prettyDmenu =
-  "dmenu_run \
-  \-nb '#000000' \
-  \-nf '#dddddd' \
-  \-sb '#14ffff' \
-  \-sf '#000000' \
-  \-fn 'Hack:bold:pixelsize=36' \
-  \-p Run"
-
 getFocusedWindow :: WindowSet -> Maybe Window
 getFocusedWindow =
   fmap StackSet.focus
     . StackSet.stack
     . StackSet.workspace
     . StackSet.current
-
-_myXPConfig :: XPConfig
-_myXPConfig =
-  def
-    { font = "xft:Hack:bold:pixelsize=36"
-    }
 
 getPid :: X (Maybe ProcessID)
 getPid =
@@ -196,7 +190,7 @@ _magenta = "#cb1ed1"
 
 _cyan = "#0dcdcd"
 
-_white = "#dddddd"
+white = "#dddddd"
 
 _brightBlack = "#767676"
 
@@ -210,6 +204,6 @@ _brightBlue = "#1a8fff"
 
 _brightMagenta = "#fd28ff"
 
-_brightCyan = "#14ffff"
+brightCyan = "#14ffff"
 
 _brightWhite = "#ffffff"
