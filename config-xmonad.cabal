@@ -4,38 +4,41 @@ name: config-xmonad
 version: 0.1.0
 build-type: Simple
 
-executable my-xmonad
-  main-is: xmonad.hs
-  default-language:
-    Haskell2010
+library
+  hs-source-dirs: src
+  default-language: Haskell2010
   ghc-options:
-    -threaded
     -Wall
     -fno-warn-missing-signatures
     -fno-warn-partial-type-signatures
+  exposed-modules:
+    MyXmonad
+    MyXmobar
+  other-modules:
+    Colors
+    Machines
   build-depends:
+    X11,
     base,
+    bytestring,
+    containers,
+    directory,
+    hostname,
+    template-haskell,
+    text,
+    xmobar,
     xmonad,
     xmonad-contrib,
     xmonad-extras,
-    X11,
-    directory,
-    bytestring,
-    containers,
-    text,
-    template-haskell,
-    hostname,
+
+executable my-xmonad
+  main-is: xmonad.hs
+  default-language: Haskell2010
+  ghc-options: -threaded
+  build-depends: base, config-xmonad
 
 executable my-xmobar
   main-is: xmobar.hs
-  default-language:
-    Haskell2010
-  ghc-options:
-    -threaded
-    -Wall
-    -fno-warn-missing-signatures
-    -fno-warn-partial-type-signatures
-  build-depends:
-    base,
-    xmobar,
-    hostname,
+  default-language: Haskell2010
+  ghc-options: -threaded
+  build-depends: base, config-xmonad
