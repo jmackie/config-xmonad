@@ -1,5 +1,10 @@
 resolver: lts-14.20 # ghc865
 packages:
   - .
+extra-deps:
+  - xmobar-0.32@sha256:f2cf80a8b524642ff28b8a821ebcba6908238080eb2df9ca09f02f643c92a83c,10784
+flags:
+  xmobar:
+    with_xft: true
 nix:
   shell-file: shell.nix

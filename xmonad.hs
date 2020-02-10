@@ -8,11 +8,7 @@ module Main
   )
 where
 
-import qualified Data.Map as M
-import Graphics.X11.ExtraTypes.XF86
-  ( xF86XK_MonBrightnessDown,
-    xF86XK_MonBrightnessUp,
-  )
+import qualified Data.Map as Map
 import Network.HostName (getHostName)
 import System.Posix.Types (ProcessID)
 import XMonad
@@ -43,7 +39,6 @@ import XMonad.Layout.ZoomRow
 import XMonad.Prompt (XPConfig (..))
 import XMonad.Prompt.Shell (shellPrompt)
 import qualified XMonad.StackSet as StackSet
-import qualified XMonad.Util.Brightness as Brightness
 
 data Machine
   = Laptop
@@ -60,10 +55,7 @@ getMachine = do
 main :: IO ()
 main = do
   machine <- maybe Laptop id <$> getMachine
-  let xmobar = case machine of
-        Laptop -> "xmobar ~/.xmonad/xmobar.laptop.hs"
-        Habito -> "xmobar ~/.xmonad/xmobar.habito.hs"
-  xmonad =<< statusBar xmobar myPP toggleStrutsKey (myXConfig machine)
+  xmonad =<< statusBar "~/.xmonad/bin/my-xmobar" myPP toggleStrutsKey (myXConfig machine)
 
 myXConfig :: Machine -> XConfig _
 myXConfig machine =
@@ -107,7 +99,7 @@ myManageHook =
       transience -- Move transient windows to their parent
     ]
 
-myKeys :: Machine -> XConfig Layout -> M.Map (ButtonMask, KeySym) (X ())
+myKeys :: Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
 myKeys machine XConfig {terminal, modMask} =
   [ -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
