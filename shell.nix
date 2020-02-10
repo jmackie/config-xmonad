@@ -24,7 +24,7 @@ else
 # stack build
   pkgs.haskell.lib.buildStackProject {
     inherit ghc;
-    name = "xmonad-env";
+    name = "config-xmonad";
     buildInputs = [
       pkgs.pkgconfig
       pkgs.autoconf
