@@ -8,9 +8,10 @@ module MyXmonad
   )
 where
 
-import qualified Colors
+import Colors (black, brightCyan, brightGreen, white)
 import qualified Data.Map as Map
-import qualified Machines
+import Fonts (hackBold, toXftFontName)
+import Machines (Machine (..), getMachine)
 import System.Posix.Types (ProcessID)
 import XMonad
 import qualified XMonad.Actions.CycleWS as CycleWS
@@ -43,10 +44,10 @@ import qualified XMonad.StackSet as StackSet
 
 main :: IO ()
 main = do
-  machine <- maybe Machines.Laptop id <$> Machines.getMachine
-  xmonad =<< statusBar "~/.xmonad/bin/my-xmobar" myPP toggleStrutsKey (myXConfig machine)
+  machine <- maybe Laptop id <$> getMachine
+  xmonad =<< statusBar "~/.xmonad/bin/my-xmobar" myXmobarPP toggleStrutsKey (myXConfig machine)
 
-myXConfig :: Machines.Machine -> XConfig _
+myXConfig :: Machine -> XConfig _
 myXConfig machine =
   desktopConfig
     { terminal = "alacritty",
@@ -56,8 +57,8 @@ myXConfig machine =
       manageHook = myManageHook <+> manageHook desktopConfig,
       keys = myKeys machine <> XMonad.keys desktopConfig,
       logHook = dynamicLogString def >>= xmonadPropLog,
-      normalBorderColor = Colors.black,
-      focusedBorderColor = Colors.brightGreen,
+      normalBorderColor = black,
+      focusedBorderColor = brightGreen,
       borderWidth = 2,
       layoutHook = layoutHook desktopConfig ||| Mirror zoomRow
     }
@@ -70,11 +71,12 @@ myStartupHook = pure ()
 
 -- |
 -- Stdin pretty-printer for xmobar.
-myPP :: PP
-myPP =
+myXmobarPP :: PP
+myXmobarPP =
   xmobarPP
     { ppOrder = \(ws : _ : t : pid' : _) -> [ws, pid', t],
-      ppExtras = [Just . maybe "" show <$> getPid]
+      ppSep = " | ",
+      ppExtras = [Just . maybe "" (\pid' -> "pid: " <> show pid') <$> getPid]
     }
 
 -- |
@@ -88,13 +90,13 @@ myManageHook =
       transience -- Move transient windows to their parent
     ]
 
-myKeys :: Machines.Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
+myKeys :: Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
 myKeys machine XConfig {terminal, modMask} =
   [ -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
       case machine of
-        Machines.Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
-        Machines.Habito -> CycleWS.nextScreen
+        Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+        Habito -> CycleWS.nextScreen
     ),
     -- TODO: It would be nice if I could make this
     -- use the focused terminal's working dir
@@ -104,19 +106,16 @@ myKeys machine XConfig {terminal, modMask} =
     ( (modMask .|. shiftMask, xK_l),
       spawn "slock"
     ),
-    ( (modMask, xK_g),
-      spawn "gllock.nix" -- https://github.com/jmackie/gllock.nix
-    ),
     -- Like dmenu but built in to xmonad :)
     ( (modMask, xK_p),
       shellPrompt
         (def :: XPConfig)
-          { font = "xft:Hack:bold:pixelsize=36",
+          { font = toXftFontName (hackBold 10),
             height = 50,
-            bgColor = Colors.black,
-            fgColor = Colors.white,
-            bgHLight = Colors.brightCyan,
-            fgHLight = Colors.black,
+            bgColor = black,
+            fgColor = white,
+            bgHLight = brightCyan,
+            fgHLight = black,
             historySize = 0
           }
     )
@@ -125,8 +124,8 @@ myKeys machine XConfig {terminal, modMask} =
     --((0, xF86XK_MonBrightnessDown), undefined)
   ]
     <> case machine of
-      Machines.Laptop -> []
-      Machines.Habito ->
+      Laptop -> []
+      Habito ->
         [ -- Increase the size occupied by the focused window
           ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn),
           -- Decrease the size occupied by the focused window

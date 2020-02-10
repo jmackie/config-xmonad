@@ -17,6 +17,7 @@ library
   other-modules:
     Colors
     Machines
+    Fonts
   build-depends:
     X11,
     base,

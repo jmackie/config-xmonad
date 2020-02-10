@@ -3,32 +3,33 @@ module MyXmobar
   )
 where
 
-import qualified Colors
-import qualified Machines
+import Colors (black, brightGreen, brightMagenta, brightRed, brightYellow, white)
+import Fonts (hackBold, toXftFontName)
+import Machines (Machine (..), getMachine)
 import Xmobar
 
 main :: IO ()
 main = do
-  machine <- maybe Machines.Laptop id <$> Machines.getMachine
+  machine <- maybe Laptop id <$> getMachine
   case machine of
-    Machines.Laptop -> xmobar laptopConfig
-    Machines.Habito -> xmobar habitoConfig
+    Laptop -> xmobar laptopConfig
+    Habito -> xmobar habitoConfig
 
 laptopConfig :: Config
 laptopConfig =
-  baseConfig
-    { template = "%StdinReader% }{ %cpu% | %memory% * %swap% | %battery% | <fc=#fd28ff>%date%</fc>",
-      sepChar = "%",
-      alignSep = "}{",
-      commands =
-        [ Run StdinReader,
-          Run (cpuCommand 10),
-          Run (memoryCommand 10),
-          Run (swapCommand 10),
-          Run (batteryCommand 20),
-          Run (dateCommand 10)
-        ]
-    }
+  withTemplate
+    ("%StdinReader%", fc brightMagenta "%date%", "%cpu% | %memory% * %swap% | %battery%")
+    baseConfig
+      { sepChar = "%",
+        commands =
+          [ Run StdinReader,
+            Run (cpuCommand 10),
+            Run (memoryCommand 10),
+            Run (swapCommand 10),
+            Run (batteryCommand 20),
+            Run (dateCommand 10)
+          ]
+      }
   where
     swapCommand :: Rate -> Monitors
     swapCommand = Swap []
@@ -40,27 +41,27 @@ laptopConfig =
           "-L",
           "49",
           "--high",
-          Colors.brightGreen,
+          brightGreen,
           "--normal",
-          Colors.brightYellow,
+          brightYellow,
           "--low",
-          Colors.brightRed
+          brightRed
         ]
 
 habitoConfig :: Config
 habitoConfig =
-  baseConfig
-    { template = "%StdinReader% }{ %cpu% | %memory% | %enp4s0% | <fc=#fd28ff>%date%</fc>",
-      sepChar = "%",
-      alignSep = "}{",
-      commands =
-        [ Run StdinReader,
-          Run (cpuCommand 10),
-          Run (memoryCommand 10),
-          Run (networkCommand 10),
-          Run (dateCommand 10)
-        ]
-    }
+  withTemplate
+    ("%StdinReader%", fc brightMagenta "%date%", "%cpu% | %memory% | %enp4s0%")
+    baseConfig
+      { sepChar = "%",
+        commands =
+          [ Run StdinReader,
+            Run (cpuCommand 10),
+            Run (memoryCommand 10),
+            Run (networkCommand 10),
+            Run (dateCommand 10)
+          ]
+      }
   where
     networkCommand :: Rate -> Monitors
     networkCommand =
@@ -71,20 +72,27 @@ habitoConfig =
           "-H",
           "32",
           "--normal",
-          Colors.brightGreen,
+          brightGreen,
           "--high",
-          Colors.brightRed
+          brightRed
         ]
+
+withTemplate :: (String, String, String) -> Config -> Config
+withTemplate (left, center, right) config =
+  config
+    { template = left <> "}" <> center <> "{" <> right,
+      alignSep = "}{"
+    }
 
 baseConfig :: Config
 baseConfig =
   defaultConfig
-    { position = TopW L 100,
-      font = "xft:Hack:size=10:bold:antialias=true",
+    { position = Top,
+      font = toXftFontName (hackBold 10),
       border = BottomB,
-      borderColor = Colors.black,
-      bgColor = Colors.black,
-      fgColor = Colors.white
+      borderColor = black,
+      bgColor = black,
+      fgColor = white
     }
 
 cpuCommand :: Rate -> Monitors
@@ -95,9 +103,9 @@ cpuCommand =
       "-L",
       "3",
       "--high",
-      Colors.brightRed,
+      brightRed,
       "--normal",
-      Colors.brightGreen
+      brightGreen
     ]
 
 memoryCommand :: Rate -> Monitors
@@ -110,3 +118,7 @@ memoryCommand =
 dateCommand :: Rate -> Date
 dateCommand =
   Date "%a %b %_d %Y %H:%M" "date"
+
+fc :: String -> String -> String
+fc color string =
+  "<fc=" <> color <> ">" <> string <> "</fc>"
