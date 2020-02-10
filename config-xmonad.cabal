@@ -1,7 +1,7 @@
 cabal-version: 2.4
 
 name: config-xmonad
-version: 0.1.0
+version: 1.0.0
 build-type: Simple
 
 library

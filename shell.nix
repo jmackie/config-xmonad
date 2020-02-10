@@ -17,8 +17,15 @@ let
 in if builtins.isNull ghc then
 # Development shell
   pkgs.mkShell {
-    buildInputs =
-      [ pkgs.nodePackages.prettier ghcide-nix.ghcide-ghc865 ormolu.ormolu ];
+    buildInputs = [
+      ghcide-nix.ghcide-ghc865
+      pkgs.ghcid
+      pkgs.hlint
+      ormolu.ormolu
+      pkgs.nodePackages.prettier
+      pkgs.shfmt
+      pkgs.shellcheck
+    ];
   }
 else
 # stack build
