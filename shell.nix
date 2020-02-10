@@ -18,7 +18,7 @@ in if builtins.isNull ghc then
 # Development shell
   pkgs.mkShell {
     buildInputs = [
-      ghcide-nix.ghcide-ghc865
+      ghcide-nix.ghcide-ghc865 # should match ghc for stack.yaml resolver
       pkgs.ghcid
       pkgs.hlint
       ormolu.ormolu
