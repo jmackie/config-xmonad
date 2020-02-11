@@ -1,16 +1,20 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module MyXmobar
   ( main,
   )
 where
 
 import Colors (black, brightGreen, brightMagenta, brightRed, brightYellow, white)
+import Control.Concurrent (forkIO, threadDelay)
+import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
 import Xmobar
 
 main :: IO ()
 main = do
-  machine <- maybe Laptop id <$> getMachine
+  machine <- fromMaybe Laptop <$> getMachine
   case machine of
     Laptop -> xmobar laptopConfig
     Habito -> xmobar habitoConfig
@@ -23,11 +27,11 @@ laptopConfig =
       { sepChar = "%",
         commands =
           [ Run StdinReader,
+            Run (dateCommand 10),
             Run (cpuCommand 10),
             Run (memoryCommand 10),
             Run (swapCommand 10),
-            Run (batteryCommand 20),
-            Run (dateCommand 10)
+            Run (batteryCommand 20)
           ]
       }
   where
@@ -56,10 +60,11 @@ habitoConfig =
       { sepChar = "%",
         commands =
           [ Run StdinReader,
+            Run (dateCommand 10),
+            --Run Yubikey,
             Run (cpuCommand 10),
             Run (memoryCommand 10),
-            Run (networkCommand 10),
-            Run (dateCommand 10)
+            Run (networkCommand 10)
           ]
       }
   where
@@ -122,3 +127,24 @@ dateCommand =
 fc :: String -> String -> String
 fc color string =
   "<fc=" <> color <> ">" <> string <> "</fc>"
+
+-- TODO: Show whether my yubikey is plugged in
+data Yubikey
+  = Yubikey
+  deriving (Show, Read)
+
+instance Exec Yubikey where
+
+  alias :: Yubikey -> String
+  alias _ = "yubikey"
+
+  start :: Yubikey -> (String -> IO ()) -> IO ()
+  start _ callback = do
+    _threadId <- forkIO (listen 0)
+    pure ()
+    where
+      listen :: Int -> IO ()
+      listen count = do
+        threadDelay 100000
+        callback (show count)
+        listen (count + 1)
