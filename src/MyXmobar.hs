@@ -35,6 +35,7 @@ laptopConfig =
           ]
       }
   where
+    -- TODO: wifi command?
     swapCommand :: Rate -> Monitors
     swapCommand = Swap []
     batteryCommand :: Rate -> Monitors
