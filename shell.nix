@@ -37,6 +37,7 @@ else
       pkgs.autoconf
       pkgs.gcc
       pkgs.alsaLib
+      pkgs.libusb
       pkgs.xorg.libX11
       pkgs.xorg.libXext
       pkgs.xorg.libXft

@@ -6,10 +6,13 @@ module MyXmobar
 where
 
 import Colors (black, brightGreen, brightMagenta, brightRed, brightYellow, white)
-import Control.Concurrent (forkIO, threadDelay)
+import Control.Monad (forever)
+import qualified Data.List as List
 import Data.Maybe (fromMaybe)
+import qualified Data.Vector as Vector
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
+import qualified System.USB as USB
 import Xmobar
 
 main :: IO ()
@@ -56,13 +59,13 @@ laptopConfig =
 habitoConfig :: Config
 habitoConfig =
   withTemplate
-    ("%StdinReader%", fc brightMagenta "%date%", "%cpu% | %memory% | %enp4s0%")
+    ("%StdinReader%", fc brightMagenta "%date%", "%yubikey% | %cpu% | %memory% | %enp4s0%")
     baseConfig
       { sepChar = "%",
         commands =
           [ Run StdinReader,
             Run (dateCommand 10),
-            --Run Yubikey,
+            Run (Yubikey 10),
             Run (cpuCommand 10),
             Run (memoryCommand 10),
             Run (networkCommand 10)
@@ -129,9 +132,7 @@ fc :: String -> String -> String
 fc color string =
   "<fc=" <> color <> ">" <> string <> "</fc>"
 
--- TODO: Show whether my yubikey is plugged in
-data Yubikey
-  = Yubikey
+newtype Yubikey = Yubikey Int
   deriving (Show, Read)
 
 instance Exec Yubikey where
@@ -140,12 +141,26 @@ instance Exec Yubikey where
   alias _ = "yubikey"
 
   start :: Yubikey -> (String -> IO ()) -> IO ()
-  start _ callback = do
-    _threadId <- forkIO (listen 0)
-    pure ()
-    where
-      listen :: Int -> IO ()
-      listen count = do
-        threadDelay 100000
-        callback (show count)
-        listen (count + 1)
+  start (Yubikey refreshRate) send = do
+    ctx <- USB.newCtx
+    let vendorId = 4176
+        productId = 1031
+    -- NOTE: I can't seem to get the Hotplug API working,
+    -- so just gonna poll like this for now
+    forever $ do
+      result <- findMyDevice ctx vendorId productId
+      case result of
+        Nothing -> send (fc brightRed "no yubikey")
+        Just _ -> send (fc brightGreen "yubikey")
+      tenthSeconds refreshRate
+
+findMyDevice :: USB.Ctx -> USB.VendorId -> USB.ProductId -> IO (Maybe USB.Device)
+findMyDevice ctx vendorId productId = do
+  devices <- Vector.toList <$> USB.getDevices ctx
+  deviceDescs <- traverse USB.getDeviceDesc devices
+  pure (fst <$> List.find (match . snd) (zip devices deviceDescs))
+  where
+    match :: USB.DeviceDesc -> Bool
+    match devDesc =
+      USB.deviceVendorId devDesc == vendorId
+        && USB.deviceProductId devDesc == productId
