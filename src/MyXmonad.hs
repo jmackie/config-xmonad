@@ -107,6 +107,9 @@ myKeys machine XConfig {terminal, modMask} =
     ( (modMask .|. shiftMask, xK_l),
       spawn "slock"
     ),
+      ( (modMask, xK_g),
+      spawn "gllock"
+    ),
     -- Like dmenu but built in to xmonad :)
     ( (modMask, xK_p),
       shellPrompt
