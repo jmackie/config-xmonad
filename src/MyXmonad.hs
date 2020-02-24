@@ -10,6 +10,7 @@ where
 
 import Colors (black, brightCyan, brightGreen, white)
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
 import System.Posix.Types (ProcessID)
@@ -44,7 +45,7 @@ import qualified XMonad.StackSet as StackSet
 
 main :: IO ()
 main = do
-  machine <- maybe Laptop id <$> getMachine
+  machine <- fromMaybe Laptop <$> getMachine
   xmonad =<< statusBar "~/.xmonad/bin/my-xmobar" myXmobarPP toggleStrutsKey (myXConfig machine)
 
 myXConfig :: Machine -> XConfig _
