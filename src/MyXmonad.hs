@@ -86,7 +86,7 @@ myXmobarPP =
 myManageHook :: ManageHook
 myManageHook =
   composeOne
-    [ className =? "Gxmessage" -?> doCenterFloat,
+    [ className =? "Emoji-picker" -?> doCenterFloat,
       isDialog -?> doCenterFloat,
       transience -- Move transient windows to their parent
     ]
@@ -107,7 +107,7 @@ myKeys machine XConfig {terminal, modMask} =
     ( (modMask .|. shiftMask, xK_l),
       spawn "slock"
     ),
-      ( (modMask, xK_g),
+    ( (modMask, xK_g),
       spawn "gllock"
     ),
     -- Like dmenu but built in to xmonad :)
