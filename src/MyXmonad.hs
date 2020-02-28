@@ -87,6 +87,7 @@ myManageHook :: ManageHook
 myManageHook =
   composeOne
     [ className =? "Emoji-picker" -?> doCenterFloat,
+      className =? "Pinentry" -?> doCenterFloat,
       title =? buildWindowTitle -?> doCenterFloat, -- build feedback
       isDialog -?> doCenterFloat,
       transience -- Move transient windows to their parent
