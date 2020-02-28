@@ -12,7 +12,7 @@ echo >>"${BUILD_LOG}"
 
 # Open a `tail -f` terminal
 # (ignoring truncated file errors sent to stderr)
-alacritty --title "${BUILD_WINDOW_TITLE}" --command sh -c "tail -f ${BUILD_LOG} 2> /dev/null" &
+alacritty --title "${BUILD_WINDOW_TITLE}" --dimensions 100 20 --command sh -c "tail -f ${BUILD_LOG} 2> /dev/null" &
 
 # Give xmonad a chance to position the window
 sleep 0.5
