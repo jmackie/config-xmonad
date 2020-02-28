@@ -46,7 +46,7 @@ import qualified XMonad.StackSet as StackSet
 main :: IO ()
 main = do
   machine <- fromMaybe Laptop <$> getMachine
-  xmonad =<< statusBar "~/.xmonad/result/bin/my-xmobar" myXmobarPP toggleStrutsKey (myXConfig machine)
+  xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig machine)
 
 myXConfig :: Machine -> XConfig _
 myXConfig machine =

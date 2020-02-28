@@ -4,8 +4,9 @@
 *.errors
 build.log
 
-# compiled xmonad executable
+# compiled xmonad and xmobar executables
 xmonad-*
+xmobar-*
 
 # files used by stack
 .stack-work/

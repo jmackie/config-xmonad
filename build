@@ -7,4 +7,6 @@ set -euo pipefail
 
 nix-build --out-link ./result 2>&1 | tee build.log
 
-ln -sf "$(readlink ./result)/bin/my-xmonad" "$1"
+ln -svf "$(readlink ./result)/bin/my-xmonad" "$1"
+ln -svf "$(readlink ./result)/bin/my-xmobar" "xmobar-$(uname -m)-linux"
+rm -v result
