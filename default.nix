@@ -2,7 +2,7 @@
 let
   haskellPackages = pkgs.haskell.packages."${ghc}";
   src = builtins.path { name = "config-xmonad"; path = ./.; };
-  drv = haskellPackages.callCabal2nix "config-xmonad" src { };
+  drv = haskellPackages.callCabal2nixWithOptions "config-xmonad" src "--no-haddock --no-check" { };
   shell = let
     ghcide-nix = import ./nix/ghcide-nix { inherit pkgs; };
     ormolu = import ./nix/ormolu { inherit pkgs; };

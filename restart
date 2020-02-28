@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+BUILD_LOG="$HOME/.xmonad/build.log"
+BUILD_WINDOW_TITLE=${1:-XMonad build}
+
+# New build log
+echo "Baking a fresh xmonad..." >"${BUILD_LOG}"
+date >>"${BUILD_LOG}"
+echo >>"${BUILD_LOG}"
+
+# Open a `tail -f` terminal
+# (ignoring truncated file errors sent to stderr)
+alacritty --title "${BUILD_WINDOW_TITLE}" --command sh -c "tail -f ${BUILD_LOG} 2> /dev/null" &
+
+# Give xmonad a chance to position the window
+sleep 0.5
+
+# Actually restart
+xmonad --restart

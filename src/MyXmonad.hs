@@ -87,13 +87,18 @@ myManageHook :: ManageHook
 myManageHook =
   composeOne
     [ className =? "Emoji-picker" -?> doCenterFloat,
+      title =? buildWindowTitle -?> doCenterFloat, -- build feedback
       isDialog -?> doCenterFloat,
       transience -- Move transient windows to their parent
     ]
 
 myKeys :: Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
 myKeys machine XConfig {terminal, modMask} =
-  [ -- mod+tab cycles between workspaces
+  [ -- mod+q restarts with build feedback
+    ( (modMask, xK_q),
+      spawn ("~/.xmonad/restart " ++ buildWindowTitle)
+    ),
+    -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
       case machine of
         Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
@@ -137,6 +142,9 @@ myKeys machine XConfig {terminal, modMask} =
           -- (Un)Maximize the focused window
           ((modMask, xK_f), sendMessage ZoomFullToggle)
         ]
+
+buildWindowTitle :: String
+buildWindowTitle = "XMonad build"
 
 getFocusedWindow :: WindowSet -> Maybe Window
 getFocusedWindow =

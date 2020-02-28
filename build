@@ -5,8 +5,10 @@ set -euo pipefail
 # As of 0.13, `xmonad --recompile` will look for a custom `build` script in ~/.xmonad
 # https://github.com/xmonad/xmonad/blob/master/CHANGES.md#013-february-10-2017
 
-nix-build --out-link ./result 2>&1 | tee build.log
+BUILD_LOG="$HOME/.xmonad/build.log"
 
-ln -svf "$(readlink ./result)/bin/my-xmonad" "$1"
-ln -svf "$(readlink ./result)/bin/my-xmobar" "xmobar-$(uname -m)-linux"
-rm -v result
+nix-build --out-link ./result 2>&1 | tee "${BUILD_LOG}"
+
+ln -svf "$(readlink ./result)/bin/my-xmonad" "$1" | tee "${BUILD_LOG}"
+ln -svf "$(readlink ./result)/bin/my-xmobar" "xmobar-$(uname -m)-linux" | tee "${BUILD_LOG}"
+rm -v result | tee "${BUILD_LOG}"
