@@ -10,8 +10,8 @@ xmonad-*
 # files used by stack
 .stack-work/
 
-# directory created by `build` script
-bin/
+# created by nix-build
+result
 
 # files automatically created by xmonad
 xmonad.state

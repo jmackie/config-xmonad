@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 # As of 0.13, `xmonad --recompile` will look for a custom `build` script in ~/.xmonad
 # https://github.com/xmonad/xmonad/blob/master/CHANGES.md#013-february-10-2017
 
-stack install --local-bin-path bin/ --verbosity info 2>&1 | tee build.log
-ln -sf bin/my-xmonad "$1"
+nix-build --out-link ./result 2>&1 | tee build.log
+
+ln -sf "$(readlink ./result)/bin/my-xmonad" "$1"

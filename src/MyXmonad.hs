@@ -46,7 +46,7 @@ import qualified XMonad.StackSet as StackSet
 main :: IO ()
 main = do
   machine <- fromMaybe Laptop <$> getMachine
-  xmonad =<< statusBar "~/.xmonad/bin/my-xmobar" myXmobarPP toggleStrutsKey (myXConfig machine)
+  xmonad =<< statusBar "~/.xmonad/result/bin/my-xmobar" myXmobarPP toggleStrutsKey (myXConfig machine)
 
 myXConfig :: Machine -> XConfig _
 myXConfig machine =
@@ -99,8 +99,6 @@ myKeys machine XConfig {terminal, modMask} =
         Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
         Habito -> CycleWS.nextScreen
     ),
-    -- TODO: It would be nice if I could make this
-    -- use the focused terminal's working dir
     ( (modMask .|. shiftMask, xK_Return),
       spawn terminal
     ),
