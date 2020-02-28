@@ -96,7 +96,7 @@ myKeys :: Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
 myKeys machine XConfig {terminal, modMask} =
   [ -- mod+q restarts with build feedback
     ( (modMask, xK_q),
-      spawn ("~/.xmonad/restart " ++ buildWindowTitle)
+      spawn ("~/.xmonad/restart '" ++ buildWindowTitle ++ "'")
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
