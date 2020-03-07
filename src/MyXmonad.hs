@@ -114,6 +114,9 @@ myKeys machine XConfig {terminal, modMask} =
     ( (modMask, xK_g),
       spawn "gllock"
     ),
+    ( (modMask, xK_e),
+      spawn "emoji-picker | xclip -selection clipboard"
+    ),
     -- Like dmenu but built in to xmonad :)
     ( (modMask, xK_p),
       shellPrompt
