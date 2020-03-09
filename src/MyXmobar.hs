@@ -17,10 +17,10 @@ import Xmobar
 
 main :: IO ()
 main = do
-  machine <- fromMaybe Laptop <$> getMachine
+  machine <- fromMaybe Jarvis <$> getMachine
   case machine of
-    Laptop -> xmobar laptopConfig
-    Habito -> xmobar habitoConfig
+    Jarvis -> xmobar laptopConfig
+    Cerebro -> xmobar habitoConfig
 
 laptopConfig :: Config
 laptopConfig =

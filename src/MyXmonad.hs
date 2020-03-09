@@ -45,7 +45,7 @@ import qualified XMonad.StackSet as StackSet
 
 main :: IO ()
 main = do
-  machine <- fromMaybe Laptop <$> getMachine
+  machine <- fromMaybe Jarvis <$> getMachine
   xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig machine)
 
 myXConfig :: Machine -> XConfig _
@@ -102,8 +102,8 @@ myKeys machine XConfig {terminal, modMask} =
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
       case machine of
-        Laptop -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
-        Habito -> CycleWS.nextScreen
+        Jarvis -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
+        Cerebro -> CycleWS.nextScreen
     ),
     ( (modMask .|. shiftMask, xK_Return),
       spawn terminal
@@ -135,8 +135,8 @@ myKeys machine XConfig {terminal, modMask} =
     --((0, xF86XK_MonBrightnessDown), undefined)
   ]
     <> case machine of
-      Laptop -> []
-      Habito ->
+      Jarvis -> []
+      Cerebro ->
         [ -- Increase the size occupied by the focused window
           ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn),
           -- Decrease the size occupied by the focused window
