@@ -11,5 +11,5 @@ getMachine = do
   hostName <- getHostName
   case hostName of
     "laptop" -> pure (Just Laptop)
-    "habito" -> pure (Just Habito)
+    "jmackie-habito" -> pure (Just Habito)
     _ -> pure Nothing
