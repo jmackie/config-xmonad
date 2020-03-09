@@ -10,6 +10,6 @@ getMachine :: IO (Maybe Machine)
 getMachine = do
   hostName <- getHostName
   case hostName of
-    "laptop" -> pure (Just Laptop)
+    "jmackie-laptop" -> pure (Just Laptop)
     "jmackie-habito" -> pure (Just Habito)
     _ -> pure Nothing
