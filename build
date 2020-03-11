@@ -7,7 +7,7 @@ set -euo pipefail
 
 BUILD_LOG="$HOME/.xmonad/build.log"
 
-nix-build --out-link ./result 2>&1 | tee "${BUILD_LOG}"
+nix-build --fallback --out-link ./result 2>&1 | tee "${BUILD_LOG}"
 
 ln -svf "$(readlink ./result)/bin/my-xmonad" "$1" | tee "${BUILD_LOG}"
 ln -svf "$(readlink ./result)/bin/my-xmobar" "xmobar-$(uname -m)-linux" | tee "${BUILD_LOG}"
