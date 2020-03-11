@@ -32,6 +32,7 @@ import XMonad.Hooks.ManageHelpers
     pid,
     transience,
   )
+import XMonad.Layout.IndependentScreens (countScreens)
 import XMonad.Layout.ZoomRow
   ( ZoomMessage (..),
     zoomIn,
@@ -46,17 +47,18 @@ import qualified XMonad.StackSet as StackSet
 main :: IO ()
 main = do
   machine <- fromMaybe Jarvis <$> getMachine
-  xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig machine)
+  nScreens <- countScreens
+  xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig machine nScreens)
 
-myXConfig :: Machine -> XConfig _
-myXConfig machine =
+myXConfig :: Machine -> Int -> XConfig _
+myXConfig machine nScreens =
   desktopConfig
     { terminal = "alacritty",
       modMask = mod1Mask, -- Alt key
       workspaces = myWorkspaces,
       startupHook = myStartupHook,
       manageHook = myManageHook <+> manageHook desktopConfig,
-      keys = myKeys machine <> XMonad.keys desktopConfig,
+      keys = myKeys machine nScreens <> XMonad.keys desktopConfig,
       logHook = dynamicLogString def >>= xmonadPropLog,
       normalBorderColor = black,
       focusedBorderColor = brightGreen,
@@ -93,17 +95,15 @@ myManageHook =
       transience -- Move transient windows to their parent
     ]
 
-myKeys :: Machine -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
-myKeys machine XConfig {terminal, modMask} =
+myKeys :: Machine -> Int -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
+myKeys machine nScreens XConfig {terminal, modMask} =
   [ -- mod+q restarts with build feedback
     ( (modMask, xK_q),
       spawn ("~/.xmonad/restart '" ++ buildWindowTitle ++ "'")
     ),
     -- mod+tab cycles between workspaces
     ( (modMask, xK_Tab),
-      case machine of
-        Jarvis -> CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
-        Cerebro -> CycleWS.nextScreen
+      if nScreens > 1 then CycleWS.nextScreen else CycleWS.moveTo CycleWS.Next CycleWS.NonEmptyWS
     ),
     ( (modMask .|. shiftMask, xK_Return),
       spawn terminal
