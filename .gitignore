@@ -1,7 +1,10 @@
 # files produced by compiler
+dist-newstyle
 *.o
 *.hi
 *.errors
+
+# log from the build script
 build.log
 
 # compiled xmonad and xmobar executables

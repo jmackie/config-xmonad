@@ -12,6 +12,11 @@ import Colors (black, brightCyan, brightGreen, white)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
+import Graphics.X11.ExtraTypes.XF86
+  ( xF86XK_AudioLowerVolume,
+    xF86XK_AudioMute,
+    xF86XK_AudioRaiseVolume,
+  )
 import Machines (Machine (..), getMachine)
 import System.Posix.Types (ProcessID)
 import XMonad
@@ -129,8 +134,15 @@ myKeys machine nScreens XConfig {terminal, modMask} =
             fgHLight = black,
             historySize = 0
           }
-    )
-    -- TODO: brightness
+    ),
+
+    -- Volume
+    -- NOTE: could do this with @Sound.ALSA.Mixer@ but this is easier
+    ((0, xF86XK_AudioLowerVolume), spawn "amixer set Master 10%-"),
+    ((0, xF86XK_AudioRaiseVolume), spawn "amixer set Master 10%+"),
+    ((0, xF86XK_AudioMute), spawn "amixer set Master toggle")
+
+    -- TODO: Brightness
     --((0, xF86XK_MonBrightnessUp), undefined)
     --((0, xF86XK_MonBrightnessDown), undefined)
   ]

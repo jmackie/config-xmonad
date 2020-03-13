@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeApplications #-}
 
 module MyXmobar
   ( main,
@@ -12,6 +13,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Vector as Vector
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
+import qualified Sound.ALSA.Mixer as Alsa -- "Advanced Linux Sound Architecture"
 import qualified System.USB as USB
 import Xmobar
 
@@ -25,12 +27,13 @@ main = do
 laptopConfig :: Config
 laptopConfig =
   withTemplate
-    ("%StdinReader%", fc brightMagenta "%date%", "%cpu% | %memory% * %swap% | %battery%")
+    ("%StdinReader%", mempty, "Vol: %alsa-volume-front-left% | %cpu% | %memory% * %swap% | %battery% | " <> fc brightMagenta "%date%")
     baseConfig
       { sepChar = "%",
         commands =
           [ Run StdinReader,
             Run (dateCommand 10),
+            Run (AlsaVolume Alsa.FrontLeft "front-left" 10),
             Run (cpuCommand 10),
             Run (memoryCommand 10),
             Run (swapCommand 10),
@@ -132,7 +135,7 @@ fc :: String -> String -> String
 fc color string =
   "<fc=" <> color <> ">" <> string <> "</fc>"
 
-newtype Yubikey = Yubikey Int
+newtype Yubikey = Yubikey {yubikeyRefreshRate :: Rate}
   deriving (Show, Read)
 
 instance Exec Yubikey where
@@ -141,7 +144,7 @@ instance Exec Yubikey where
   alias _ = "yubikey"
 
   start :: Yubikey -> (String -> IO ()) -> IO ()
-  start (Yubikey refreshRate) send = do
+  start yubikey send = do
     ctx <- USB.newCtx
     let vendorId = 4176
         productId = 1031
@@ -152,7 +155,7 @@ instance Exec Yubikey where
       case result of
         Nothing -> send (fc brightRed "no yubikey")
         Just _ -> send (fc brightGreen "yubikey")
-      tenthSeconds refreshRate
+      tenthSeconds (yubikeyRefreshRate yubikey)
 
 findMyDevice :: USB.Ctx -> USB.VendorId -> USB.ProductId -> IO (Maybe USB.Device)
 findMyDevice ctx vendorId productId = do
@@ -164,3 +167,34 @@ findMyDevice ctx vendorId productId = do
     match devDesc =
       USB.deviceVendorId devDesc == vendorId
         && USB.deviceProductId devDesc == productId
+
+data AlsaVolume
+  = AlsaVolume
+      { alsaVolumeChannel :: Alsa.Channel,
+        alsaVolumeChannelName :: String,
+        alsaVolumeRefreshRate :: Rate
+      }
+  deriving (Show, Read)
+
+instance Exec AlsaVolume where
+
+  alias :: AlsaVolume -> String
+  alias alsaVolume = "alsa-volume-" <> alsaVolumeChannelName alsaVolume
+
+  rate :: AlsaVolume -> Int
+  rate = alsaVolumeRefreshRate
+
+  run :: AlsaVolume -> IO String
+  run alsaVolume =
+    Alsa.withMixer "default" $ \mixer -> do
+      Just masterControl <- Alsa.getControlByName mixer "Master"
+      let Just masterSwitch = Alsa.playback (Alsa.switch masterControl)
+      Just switchedOn <- Alsa.getChannel (alsaVolumeChannel alsaVolume) masterSwitch
+      if not switchedOn
+        then pure "<muted>"
+        else do
+          let Just masterVolume = Alsa.playback (Alsa.volume masterControl)
+          (_volumeMin, volumeMax) <- Alsa.getRange masterVolume
+          Just volume <- Alsa.getChannel (alsaVolumeChannel alsaVolume) (Alsa.value masterVolume)
+          let volumePercent = (fromIntegral @Alsa.CLong @Double volume / fromIntegral @Alsa.CLong @Double volumeMax) * 100
+          pure (show @Integer (round volumePercent) <> "%")
