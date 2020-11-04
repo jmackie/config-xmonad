@@ -19,19 +19,26 @@ let
   drv = haskellPackages.callCabal2nixWithOptions "config-xmonad" src
     "--no-haddock --no-check" { };
 
+  # TODO: use haskellPackages overrides
+
   shell = let
     ghcide-nix = import ./nix/ghcide-nix { inherit pkgs; };
     ormolu = import ./nix/ormolu { inherit pkgs; };
   in haskellPackages.shellFor {
     packages = p: [ drv ];
     buildInputs = [
+      # developing
       pkgs.cabal-install
       pkgs.ghcid
+
+      # linters
       pkgs.hlint
-      pkgs.ormolu
-      pkgs.nodePackages.prettier
-      pkgs.shfmt
       pkgs.shellcheck
+
+      # formatters
+      pkgs.ormolu
+      pkgs.shfmt
+      pkgs.nodePackages.prettier
     ];
     withHoogle = false;
   };
