@@ -11,11 +11,13 @@ import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
 import qualified Sound.ALSA.Mixer as Alsa -- "Advanced Linux Sound Architecture"
+import System.Environment (setEnv)
 import Xmobar
 
 main :: IO ()
 main = do
   machine <- fromMaybe Jarvis <$> getMachine
+  setEnv "DBUS_SESSION_BUS_ADDRESS" "unix:path=/run/dbus/system_bus_socket"
   case machine of
     Jarvis -> xmobar laptopConfig
 

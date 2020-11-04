@@ -16,7 +16,6 @@ import Graphics.X11.ExtraTypes.XF86
     xF86XK_AudioMute,
     xF86XK_AudioRaiseVolume,
   )
---import Machines (Machine (..), getMachine)
 import System.Posix.Types (ProcessID)
 import XMonad
 import qualified XMonad.Actions.CycleWS as CycleWS
@@ -44,7 +43,6 @@ import qualified XMonad.StackSet as StackSet
 
 main :: IO ()
 main = do
-  --machine <- fromMaybe Jarvis <$> getMachine
   nScreens <- countScreens
   xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig nScreens)
 
