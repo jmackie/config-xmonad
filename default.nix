@@ -1,4 +1,4 @@
-{ pkgs ? import ./nix/nixpkgs { }, ghc ? "ghc865" }:
+{ pkgs ? import <nixos> { }, ghc ? "ghc865" }:
 let
   haskellPackages = pkgs.haskell.packages."${ghc}";
 
@@ -15,18 +15,20 @@ let
     src = ./.;
     name = "config-xmonad";
   };
+
   drv = haskellPackages.callCabal2nixWithOptions "config-xmonad" src
     "--no-haddock --no-check" { };
+
   shell = let
     ghcide-nix = import ./nix/ghcide-nix { inherit pkgs; };
     ormolu = import ./nix/ormolu { inherit pkgs; };
   in haskellPackages.shellFor {
     packages = p: [ drv ];
     buildInputs = [
-      ghcide-nix."ghcide-${ghc}"
+      pkgs.cabal-install
       pkgs.ghcid
       pkgs.hlint
-      ormolu.ormolu
+      pkgs.ormolu
       pkgs.nodePackages.prettier
       pkgs.shfmt
       pkgs.shellcheck

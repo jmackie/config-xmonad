@@ -9,13 +9,12 @@ where
 import Data.List (intercalate)
 import Data.Maybe (catMaybes)
 
-data Font
-  = Font
-      { fontFamily :: String,
-        fontSize :: Int,
-        fontBold :: Bool,
-        fontAntialias :: Bool
-      }
+data Font = Font
+  { fontFamily :: String,
+    fontSize :: Int,
+    fontBold :: Bool,
+    fontAntialias :: Bool
+  }
 
 hack :: Int -> Font
 hack size =

@@ -7,14 +7,10 @@ module MyXmobar
 where
 
 import Colors (black, brightGreen, brightMagenta, brightRed, brightYellow, white)
-import Control.Monad (forever)
-import qualified Data.List as List
 import Data.Maybe (fromMaybe)
-import qualified Data.Vector as Vector
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
 import qualified Sound.ALSA.Mixer as Alsa -- "Advanced Linux Sound Architecture"
-import qualified System.USB as USB
 import Xmobar
 
 main :: IO ()
@@ -22,7 +18,6 @@ main = do
   machine <- fromMaybe Jarvis <$> getMachine
   case machine of
     Jarvis -> xmobar laptopConfig
-    Cerebro -> xmobar habitoConfig
 
 laptopConfig :: Config
 laptopConfig =
@@ -59,35 +54,19 @@ laptopConfig =
           brightRed
         ]
 
-habitoConfig :: Config
-habitoConfig =
-  withTemplate
-    ("%StdinReader%", fc brightMagenta "%date%", "%yubikey% | %cpu% | %memory% | %enp4s0%")
-    baseConfig
-      { sepChar = "%",
-        commands =
-          [ Run StdinReader,
-            Run (dateCommand 10),
-            Run (Yubikey 10),
-            Run (cpuCommand 10),
-            Run (memoryCommand 10),
-            Run (networkCommand 10)
-          ]
-      }
-  where
-    networkCommand :: Rate -> Monitors
-    networkCommand =
-      Network
-        "enp4s0"
-        [ "-L",
-          "0",
-          "-H",
-          "32",
-          "--normal",
-          brightGreen,
-          "--high",
-          brightRed
-        ]
+-- networkCommand :: Rate -> Monitors
+-- networkCommand =
+--   Network
+--     "enp4s0"
+--     [ "-L",
+--       "0",
+--       "-H",
+--       "32",
+--       "--normal",
+--       brightGreen,
+--       "--high",
+--       brightRed
+--     ]
 
 withTemplate :: (String, String, String) -> Config -> Config
 withTemplate (left, center, right) config =
@@ -135,49 +114,14 @@ fc :: String -> String -> String
 fc color string =
   "<fc=" <> color <> ">" <> string <> "</fc>"
 
-newtype Yubikey = Yubikey {yubikeyRefreshRate :: Rate}
-  deriving (Show, Read)
-
-instance Exec Yubikey where
-
-  alias :: Yubikey -> String
-  alias _ = "yubikey"
-
-  start :: Yubikey -> (String -> IO ()) -> IO ()
-  start yubikey send = do
-    ctx <- USB.newCtx
-    let vendorId = 4176
-        productId = 1031
-    -- NOTE: I can't seem to get the Hotplug API working,
-    -- so just gonna poll like this for now
-    forever $ do
-      result <- findMyDevice ctx vendorId productId
-      case result of
-        Nothing -> send (fc brightRed "no yubikey")
-        Just _ -> send (fc brightGreen "yubikey")
-      tenthSeconds (yubikeyRefreshRate yubikey)
-
-findMyDevice :: USB.Ctx -> USB.VendorId -> USB.ProductId -> IO (Maybe USB.Device)
-findMyDevice ctx vendorId productId = do
-  devices <- Vector.toList <$> USB.getDevices ctx
-  deviceDescs <- traverse USB.getDeviceDesc devices
-  pure (fst <$> List.find (match . snd) (zip devices deviceDescs))
-  where
-    match :: USB.DeviceDesc -> Bool
-    match devDesc =
-      USB.deviceVendorId devDesc == vendorId
-        && USB.deviceProductId devDesc == productId
-
-data AlsaVolume
-  = AlsaVolume
-      { alsaVolumeChannel :: Alsa.Channel,
-        alsaVolumeChannelName :: String,
-        alsaVolumeRefreshRate :: Rate
-      }
+data AlsaVolume = AlsaVolume
+  { alsaVolumeChannel :: Alsa.Channel,
+    alsaVolumeChannelName :: String,
+    alsaVolumeRefreshRate :: Rate
+  }
   deriving (Show, Read)
 
 instance Exec AlsaVolume where
-
   alias :: AlsaVolume -> String
   alias alsaVolume = "alsa-volume-" <> alsaVolumeChannelName alsaVolume
 

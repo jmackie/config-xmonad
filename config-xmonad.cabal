@@ -28,7 +28,6 @@ library
     hostname,
     template-haskell,
     text,
-    usb,
     vector,
     xmobar,
     xmonad,

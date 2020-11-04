@@ -10,14 +10,13 @@ where
 
 import Colors (black, brightCyan, brightGreen, white)
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
 import Graphics.X11.ExtraTypes.XF86
   ( xF86XK_AudioLowerVolume,
     xF86XK_AudioMute,
     xF86XK_AudioRaiseVolume,
   )
-import Machines (Machine (..), getMachine)
+--import Machines (Machine (..), getMachine)
 import System.Posix.Types (ProcessID)
 import XMonad
 import qualified XMonad.Actions.CycleWS as CycleWS
@@ -30,40 +29,34 @@ import XMonad.Hooks.DynamicLog
     xmonadPropLog,
   )
 import XMonad.Hooks.ManageHelpers
-  ( (-?>),
-    composeOne,
+  ( composeOne,
     doCenterFloat,
     isDialog,
     pid,
     transience,
+    (-?>),
   )
 import XMonad.Layout.IndependentScreens (countScreens)
-import XMonad.Layout.ZoomRow
-  ( ZoomMessage (..),
-    zoomIn,
-    zoomOut,
-    zoomReset,
-    zoomRow,
-  )
+import XMonad.Layout.ZoomRow (zoomRow)
 import XMonad.Prompt (XPConfig (..))
 import XMonad.Prompt.Shell (shellPrompt)
 import qualified XMonad.StackSet as StackSet
 
 main :: IO ()
 main = do
-  machine <- fromMaybe Jarvis <$> getMachine
+  --machine <- fromMaybe Jarvis <$> getMachine
   nScreens <- countScreens
-  xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig machine nScreens)
+  xmonad =<< statusBar "~/.xmonad/xmobar-x86_64-linux" myXmobarPP toggleStrutsKey (myXConfig nScreens)
 
-myXConfig :: Machine -> Int -> XConfig _
-myXConfig machine nScreens =
+myXConfig :: Int -> XConfig _
+myXConfig nScreens =
   desktopConfig
     { terminal = "alacritty",
       modMask = mod1Mask, -- Alt key
       workspaces = myWorkspaces,
       startupHook = myStartupHook,
       manageHook = myManageHook <+> manageHook desktopConfig,
-      keys = myKeys machine nScreens <> XMonad.keys desktopConfig,
+      keys = myKeys nScreens <> XMonad.keys desktopConfig,
       logHook = dynamicLogString def >>= xmonadPropLog,
       normalBorderColor = black,
       focusedBorderColor = brightGreen,
@@ -100,8 +93,8 @@ myManageHook =
       transience -- Move transient windows to their parent
     ]
 
-myKeys :: Machine -> Int -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
-myKeys machine nScreens XConfig {terminal, modMask} =
+myKeys :: Int -> XConfig Layout -> Map.Map (ButtonMask, KeySym) (X ())
+myKeys nScreens XConfig {terminal, modMask} =
   [ -- mod+q restarts with build feedback
     ( (modMask, xK_q),
       spawn ("~/.xmonad/restart '" ++ buildWindowTitle ++ "'")
@@ -135,29 +128,15 @@ myKeys machine nScreens XConfig {terminal, modMask} =
             historySize = 0
           }
     ),
-
     -- Volume
     -- NOTE: could do this with @Sound.ALSA.Mixer@ but this is easier
     ((0, xF86XK_AudioLowerVolume), spawn "amixer set Master 10%-"),
     ((0, xF86XK_AudioRaiseVolume), spawn "amixer set Master 10%+"),
     ((0, xF86XK_AudioMute), spawn "amixer set Master toggle")
-
     -- TODO: Brightness
     --((0, xF86XK_MonBrightnessUp), undefined)
     --((0, xF86XK_MonBrightnessDown), undefined)
   ]
-    <> case machine of
-      Jarvis -> []
-      Cerebro ->
-        [ -- Increase the size occupied by the focused window
-          ((modMask .|. shiftMask, xK_minus), sendMessage zoomIn),
-          -- Decrease the size occupied by the focused window
-          ((modMask, xK_minus), sendMessage zoomOut),
-          -- Reset the size occupied by the focused window
-          ((modMask, xK_equal), sendMessage zoomReset),
-          -- (Un)Maximize the focused window
-          ((modMask, xK_f), sendMessage ZoomFullToggle)
-        ]
 
 buildWindowTitle :: String
 buildWindowTitle = "XMonad build"
