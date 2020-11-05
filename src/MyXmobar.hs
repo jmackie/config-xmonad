@@ -1,6 +1,3 @@
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE TypeApplications #-}
-
 module MyXmobar
   ( main,
   )
@@ -10,7 +7,6 @@ import Colors (black, brightGreen, brightMagenta, brightRed, brightYellow, white
 import Data.Maybe (fromMaybe)
 import Fonts (hackBold, toXftFontName)
 import Machines (Machine (..), getMachine)
-import qualified Sound.ALSA.Mixer as Alsa -- "Advanced Linux Sound Architecture"
 import System.Environment (setEnv)
 import Xmobar
 
@@ -24,13 +20,12 @@ main = do
 laptopConfig :: Config
 laptopConfig =
   withTemplate
-    ("%StdinReader%", mempty, "Vol: %alsa-volume-front-left% | %cpu% | %memory% * %swap% | %battery% | " <> fc brightMagenta "%date%")
+    ("%StdinReader%", mempty, "%cpu% | %memory% * %swap% | %battery% | " <> fc brightMagenta "%date%")
     baseConfig
       { sepChar = "%",
         commands =
           [ Run StdinReader,
             Run (dateCommand 10),
-            Run (AlsaVolume Alsa.FrontLeft "front-left" 10),
             Run (cpuCommand 10),
             Run (memoryCommand 10),
             Run (swapCommand 10),
@@ -115,32 +110,3 @@ dateCommand =
 fc :: String -> String -> String
 fc color string =
   "<fc=" <> color <> ">" <> string <> "</fc>"
-
-data AlsaVolume = AlsaVolume
-  { alsaVolumeChannel :: Alsa.Channel,
-    alsaVolumeChannelName :: String,
-    alsaVolumeRefreshRate :: Rate
-  }
-  deriving (Show, Read)
-
-instance Exec AlsaVolume where
-  alias :: AlsaVolume -> String
-  alias alsaVolume = "alsa-volume-" <> alsaVolumeChannelName alsaVolume
-
-  rate :: AlsaVolume -> Int
-  rate = alsaVolumeRefreshRate
-
-  run :: AlsaVolume -> IO String
-  run alsaVolume =
-    Alsa.withMixer "default" $ \mixer -> do
-      Just masterControl <- Alsa.getControlByName mixer "Master"
-      let Just masterSwitch = Alsa.playback (Alsa.switch masterControl)
-      Just switchedOn <- Alsa.getChannel (alsaVolumeChannel alsaVolume) masterSwitch
-      if not switchedOn
-        then pure "<muted>"
-        else do
-          let Just masterVolume = Alsa.playback (Alsa.volume masterControl)
-          (_volumeMin, volumeMax) <- Alsa.getRange masterVolume
-          Just volume <- Alsa.getChannel (alsaVolumeChannel alsaVolume) (Alsa.value masterVolume)
-          let volumePercent = (fromIntegral @Alsa.CLong @Double volume / fromIntegral @Alsa.CLong @Double volumeMax) * 100
-          pure (show @Integer (round volumePercent) <> "%")

@@ -20,7 +20,6 @@ library
     Fonts
   build-depends:
     X11,
-    alsa-mixer,
     base,
     bytestring,
     containers,
