@@ -23,7 +23,7 @@ jobs:
 
       - name: Sign
         run: |
-          echo ${{ secrets.CACHIX_SIGNING_KEY }} > secret.key
+          echo ${{ secrets.SECRET_SIGNING_KEY }} > secret.key
           nix sign-paths --key-file secret.key --recursive $(readlink result)
 
       - name: Push
