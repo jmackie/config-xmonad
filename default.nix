@@ -14,6 +14,7 @@ let
     name = "config-xmonad";
   };
 
+  # TODO: don't build haddocks for dependencies:
   haskellPackages = pkgs.haskell.packages."${ghc}".override {
     overrides = new: old: {
       xmobar =
