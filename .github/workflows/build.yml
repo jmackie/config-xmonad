@@ -16,7 +16,7 @@ jobs:
 
       - uses: cachix/install-nix-action@v12
         with:
-          nix_path: "nixos=${{ github.event.inputs.name }}"
+          nix_path: "nixos=${{ github.event.inputs.pkgs }}"
 
       - name: Build
         run: nix-build -o result
